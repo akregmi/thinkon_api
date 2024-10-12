@@ -83,7 +83,7 @@ Open Visual Studio Code.
     ```
 - Update application.properties with your PostgreSQL credentials:
     ```
-    spring.datasource.url=jdbc:postgresql://localhost:5432/user_management
+    spring.datasource.url=jdbc:postgresql://localhost:5432/database_name
     spring.datasource.username=yourusername
     spring.datasource.password=yourpassword
     ```
@@ -95,7 +95,7 @@ Open Visual Studio Code.
 - If imported, you can also run the application through your IDE
 ## Example API Requests
 
-**1. Create New User:** ```POST /users```
+**1. Create New User:** `POST /users`
 ```
     {
         "username": "testuser",
@@ -106,11 +106,11 @@ Open Visual Studio Code.
     }
 ```
 
-**2. Get All Users:** ```GET /users```
+**2. Get All Users:** `GET /users`
 
-**3. Get User With ID 1:** ```GET /users/1```
+**3. Get User With ID 1:** `GET /users/1`
 
-**4. Update User with ID 1:** ```PUT /users/1```
+**4. Update User with ID 1:** `PUT /users/1`
 ```
     {
         "username": "UpdatedUsername",
@@ -121,4 +121,43 @@ Open Visual Studio Code.
     }
 ```
 
-**5. Delete User With User 1:** ```DELETE /users/1```
+**5. Delete User With User 1:** `DELETE /users/1`
+## Additional Info
+
+Due to the instructions not having super thorough instructions, I have taken liberty to implement certain features and constraints based off reasonable assumptions. 
+
+- User ID's will be auto-generated and wont to be taken in as a value in the `POST` request
+- The following values must be unique: `username, email`
+- All fields must contain a value and cannot be null
+    - To change these constraints edit the following:
+        - Edit the `unique` and `nullable` parameters for following in `src/main/java/com/akregmi/thinkonapi/model/User.java`:
+            ```
+            @Column(unique = true, nullable = false)
+            private String username;
+
+            @Column(nullable = false)
+            private String firstName;
+
+            @Column(nullable = false)
+            private String lastName;
+
+            @Column(unique = true, nullable = false)
+            private String email;
+
+            @Column(nullable = false)
+            private String phoneNumber;
+            ```
+        - Change the `createUser` function in `src/main/java/com/akregmi/thinkonapi/service/UserService.java` to:
+            ```
+            public User createUser(User user){
+                return userRepository.save(user);
+            }
+            ```
+    - Table may need to be dropped for these constraints to be applied
+- Response has been set up to reflect the status of the request and provide additional information in the body of the response
+    - ie. If username/email already in use, `PUT /users` will return code `409 CONFLICT` with the response message: `Email/Username already in use`
+
+
+## Future Additions
+- Even more extensive error handling and validation (null error handling, email validation, etc.)
+- Unit and integration testing
